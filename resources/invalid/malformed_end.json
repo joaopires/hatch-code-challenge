@@ -1,0 +1,14 @@
+[
+   {
+      "id": "jhasdad",
+      "name": "test json",
+      "obj": {
+         "array": [1,5,6,7,8],
+         "age": 19
+      }
+   },
+   {
+      "id": "wqweq",
+      "name": "test json 2"
+   }
+}

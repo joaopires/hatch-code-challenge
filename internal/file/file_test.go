@@ -1,18 +1,102 @@
 package file
 
 import (
+	"encoding/json"
+	"fmt"
 	"io/fs"
 	"testing"
 
 	"github.com/joaopires/hatch/internal/utils"
 )
 
+// Valid json files
 const testFilepathA = "../../resources/equal/unordered_small_file_before_backup.json"
 const testFilepathB = "../../resources/equal/unordered_small_file_after_backup.json"
 const testFilepathC = "../../resources/equal/unordered_medium_file_before_backup.json"
 
-func TestProcess(t *testing.T) {
+// Invalid json files
+const testFilepathMalformedBegin = "../../resources/invalid/malformed_begin.json"
+const testFilepathMalformedEnd = "../../resources/invalid/malformed_end.json"
+const testFilepathInvalidObject = "../../resources/invalid/invalid_obj.json"
 
+func TestProcess(t *testing.T) {
+	target := "Process"
+
+	// Lame way of mocking the test result...
+	jsonArray := []map[string]interface{}{
+		{
+			"id":   "jhasdad",
+			"name": "test json",
+			"obj": map[string]interface{}{
+				"array": []int{1, 5, 6, 7, 8},
+				"age":   19,
+			},
+		},
+		{
+			"id":   "wqweq",
+			"name": "test json 2",
+		},
+	}
+
+	print(utils.GetMD5Hash(fmt.Sprint(jsonArray[0])))
+	print(utils.GetMD5Hash(fmt.Sprint(jsonArray[1])))
+
+	expectedResult := fmt.Sprint(map[string]bool{
+		utils.GetMD5Hash(fmt.Sprint(jsonArray[0])): true,
+		utils.GetMD5Hash(fmt.Sprint(jsonArray[1])): true,
+	})
+
+	testCases := []struct {
+		name           string
+		filepath       string
+		expectedResult string
+		expectedError  error
+	}{
+		{
+			name:           "file not found",
+			filepath:       "",
+			expectedResult: "",
+			expectedError:  &fs.PathError{},
+		},
+		{
+			name:           "syntax error in file beginning",
+			filepath:       testFilepathMalformedBegin,
+			expectedResult: "",
+			expectedError:  &json.SyntaxError{},
+		},
+		{
+			name:           "cannot decode object",
+			filepath:       testFilepathInvalidObject,
+			expectedResult: "",
+			expectedError:  &json.SyntaxError{},
+		},
+		{
+			name:           "syntax error in file ending",
+			filepath:       testFilepathMalformedEnd,
+			expectedResult: "",
+			expectedError:  &json.SyntaxError{},
+		},
+		{
+			name:           "file processed successfully",
+			filepath:       testFilepathA,
+			expectedResult: expectedResult,
+			expectedError:  nil,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			processResult := Process(tc.filepath)
+
+			if processResult.Result != tc.expectedResult {
+				t.Fatal(utils.GetTestFailMessage(target, tc.expectedResult, processResult.Result))
+			}
+
+			if utils.AssertErrors(tc.expectedError, processResult.Err) {
+				t.Fatal(utils.GetTestFailMessage(target, tc.expectedError, processResult.Err))
+			}
+		})
+	}
 }
 
 func TestEqualSize(t *testing.T) {
@@ -86,7 +170,7 @@ func TestGetFileSize(t *testing.T) {
 			expectedError: &fs.PathError{},
 		},
 		{
-			name:          "file does not exists",
+			name:          "file not found",
 			filepath:      "invalid_filepath",
 			expectedSize:  -1,
 			expectedError: &fs.PathError{},
