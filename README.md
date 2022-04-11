@@ -2,6 +2,8 @@
 
 CLI program that reads two json files and compares them for equality, printing out the result on stdout.
 
+![block_diagram](block_diagram.png)
+
 ## Build
 
 In order to build the project you must have the [go sdk installed](https://go.dev/doc/install) on your system. The project was developed with the latest v1.18.
