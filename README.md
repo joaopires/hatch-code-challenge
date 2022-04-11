@@ -2,7 +2,7 @@
 
 CLI program that reads two json files and compares them for equality, printing out the result on stdout.
 
-![block_diagram](block_diagram.png)
+![block_diagram](https://raw.githubusercontent.com/joaopires/hatch-code-challenge/main/block_diagram.png?token=GHSAT0AAAAAABSARWDFULKH7EA465U673Q6YSUBOFA)
 
 ## Build
 
